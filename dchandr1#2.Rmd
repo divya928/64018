@@ -1,0 +1,109 @@
+---
+title: "QMM ASSIGNMENT2"
+output:
+  word_document: default
+  pdf_document: default
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+*******
+
+```{r}
+#IMPORT THE lpSolve package
+library(lpSolveAPI)
+library(lpSolve)
+```
+
+```{r}
+#WE NEED TO CREATE AN LP OBJECT NAME LPPOINT WITH 0 CONSTRAINTS NAD 9 DECISIONS VARAIBLES
+lppoint <- make.lp(0,9)
+```
+
+```{r}
+#NOW WE NEED TO SET RHE OBJECTIVE FUNCTION WHERE WE NEED TO SET THE PROBLEM TO MAXIMIZE SINCE THE DEFAULT PROBLEM IS IN MINIMIZE
+set.objfn(lppoint, c(420, 420, 420,
+                     360, 360, 360,
+                     300, 300, 300))
+```
+
+```{r}
+#WE NEED TO CHANGE OUR PROBLEM TO MAXIMIZATION
+lp.control(lppoint, sense='max')
+```
+
+```{r}
+#WE NEED TO ADD THE 12 CONSTRAINTS BASED ON THE PLANT'S NUMBER AND THE PRODUCTS MADE ON THOSE PLANTS.
+add.constraint(lppoint, c(1, 0, 0, 1, 0, 0, 1, 0, 0), "<=", 750)
+add.constraint(lppoint, c(0, 1, 0, 0, 1, 0, 0, 1, 0), "<=", 900)
+add.constraint(lppoint, c(0, 0, 1, 0, 0, 1, 0, 0, 1), "<=", 450)
+
+add.constraint(lppoint, c(20, 0, 0, 15, 0, 0, 12, 0, 0), "<=", 13000)
+add.constraint(lppoint, c (0, 20, 0, 0, 15, 0, 0, 12, 0), "<=", 12000)
+add.constraint(lppoint, c(0, 0, 20, 0, 0, 15, 0, 0, 12), "<=", 5000)
+
+add.constraint(lppoint, c(1, 1, 1, 0, 0, 0, 0, 0, 0), "<=", 900)
+add.constraint(lppoint, c(0, 0, 0, 1, 1, 1, 0, 0, 0), "<=", 1200)
+add.constraint(lppoint, c(0, 0, 0, 0, 0, 0, 1, 1, 1), "<=", 750)
+
+add.constraint(lppoint, c(900, -750, 0, 900, -750, 0, 900, -750, 0), "=", 0)
+add.constraint(lppoint, c(0, 450, -900, 0, 450, -900, 0, 450, -900), "=", 0)
+add.constraint(lppoint, c(450, 0, -750, 450, 0, -750, 450, 0, -750), "=", 0)
+```
+
+*********
+
+```{r}
+#REMEMBER THAT ALL VARIABLES HAD TO BE NON-NEGATIVE. 
+set.bounds(lppoint, lower = c(0, 0, 0, 0, 0, 0, 0, 0, 0),
+           columns = c(1:9))
+
+
+#TO IDENTIFY THE VARAIBLES AND CONSTRAINTS, WE NEED TO SET THE NAMES FOR VARIABLES AND CONSTRAINTS
+row.names<- c("ProductionCapacityPlant1", "ProductionCapacityPlant2", "ProductionCapacityPlant3",
+              "StorageCapacityPlant1", "StorageCapacityPlant2", "StorageCapacityPlant3",
+              "SalesForecastLarge","SalesForecastMedium", "SalesForecastSmall",
+              "PctCapacityPlant1_2", "PctCapacityPlant2_3", "PctCapacityPlant1_3")
+colnames<- c("Plant1Large", "Plant2Large", "Plant3Large",
+               "Plant1Medium", "Plant2Medium", "Plant3Medium",
+               "Plant1Small", "Plant2Small", "Plant3Small")
+
+dimnames(lppoint) <- list(row.names, colnames)
+
+#PRINTING THE MODEL
+lppoint
+```
+
+```{r}
+#NOW LETS SOLVE THE LP PROBLEM PRESENTED STRUCTURED ABOVE
+solve(lppoint)
+```
+
+```{r}
+#FROM THE RESULT ABOVE WE CAN SEE THAT THE RESULT IS "0" AND IT IS SOLVED. 
+##OUTPUT OF OBJECTIVE FUNCTIONS AND VARIABLE
+get.objective(lppoint)
+```
+
+```{r}
+#THEREFORE, IT GAVE US THE OPTIMAL NUMBER OF SIZE PRODUCTS THAT HAS TO BE MADE ON EACH PRODUCTION PLANT
+get.variables(lppoint)
+```
+
+```{r}
+#THEREFORE, WE CAN SAY THAT IN ORDER TO OBTAIN THE SAME PERCENTAGE OF PLANT'S EXCESS CAPACITY TO PRODUCE NEW PRODUCTS IN THREE SIZES(LARGE, MEDIUM AND SMALL) ON EACH PLANT (PLANT1, PLANT2, PLANT3) SHOULD USE 92.59% OF ITS CAPACITY
+##FROM ABOVE OUTPUT, WE CAN SAY THAT EACH PLANT SHOULD PROUDUCE,
+### 516.6667 OF LARGE PRODUCTS AND 177.778 OF MEDIUM PRODUCTS IN PLANT1
+### 666.6667 OF MEDIUM PRODUCTS AND 166.6667 OF SMALL PRODUCTS IN PLANT2
+### AND, 416.6667 OF SMALL PRODUCTS IN PLANT3
+```
