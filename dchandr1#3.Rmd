@@ -1,0 +1,217 @@
+---
+title: "Untitled"
+author: "DIVYA CHANDRASEKARAN_811284790"
+date: "2023-10-16"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+# Load the lpSolve library
+library(lpSolve)
+```
+
+```{r}
+#Install and load the packages 
+library(dplyr)
+library(magrittr)
+library(htmltools)
+```
+
+```{r}
+# Define the cost matrix
+cost_matrix <- matrix(c(20, 14, 25, 400, 100,
+                        12, 15, 14, 300, 125,
+                        10, 12, 15, 500, 150,
+                        80, 90, 70, NA, NA), nrow = 4, byrow = TRUE)
+colnames(cost_matrix) <- c("WAREHOUSE1", "WAREHOUSE2", "WAREHOUSE3", "PRODUCTIONCOST", "PRODUCTIONCAPACITY")
+rownames(cost_matrix) <- c("PlantA", "PLANTB", "PLANTC", "MONTHLYDEMAND")
+cost_matrix <- as.table(cost_matrix)
+head(cost_matrix)
+```
+
+The capacity = 220 and Demand = 210. A "Dummy" column will be added for Warehouse_4 
+
+
+```{r}
+#Creating a table
+#install.packages("kableExtra")
+library(kableExtra) 
+
+html_table = cost_matrix %>%
+kable () %>%
+kable_classic() %>%
+column_spec(2, border_left = TRUE) %>%
+column_spec(5, border_right = TRUE) %>%
+row_spec(3, extra_css = "border-bottom:dotted;")
+html_table
+```
+
+```{r}
+
+#Install and load the igraph library 
+library(igraph)
+sources <- c("PlantA", "PlantB", "PlantC")
+supply <- c(100, 125, 150)
+destinations <- c("WAREHOUSE1", "WAREHOUSE2", "WAREHOUSE3")
+demand <- c(80, 90, 70)
+```
+
+```{r}
+#Create an empty graph with the total number of vertices
+total_vertices <- length(sources) + length(destinations)
+graph <- graph.empty(n = total_vertices, directed = TRUE) 
+print(graph)
+```
+
+```{r}
+#Add vertices for sources and destinations
+V(graph)$name <- c(sources, destinations)
+```
+
+```{r}
+#Create edges from each source to each destination
+for (i in 1:length(sources)) {
+ for (j in 1:length(destinations)) {
+ weight <- min(supply[i], demand[j])
+ if (weight > 0) {
+ graph <- add_edges(graph, edges = c(sources[i], destinations[j]), weight = weight)
+ }
+ }
+}
+```
+
+```{r}
+#Graphical representation of all possible routes to supply from three PLANTS to THREE WAREHOUSES.
+library(igraph)
+#Define a layout with x-coordinates for sources and destinations
+layout <- layout_in_circle(graph, order = c(1, 2, 3, 4, 5, 6, 7, 8)) 
+```
+
+```{R}
+#Plot the graph with directed edges and the custom layout
+plot(graph, layout = layout, vertex.label.color = "black", vertex.size = 20, edge.arrow.size = 0.5)
+```
+
+```{r}
+
+#NOW FORMULATING THE TRANSPORTATION MODEL, AND IT CONSISTS OF THREE PARTS:
+#1. OBJECTIVE FUNCTION: 
+#Min TC = 20x_11 + 14x_12 + 25x_13 + 2x_21 + 15x_22 + 14x_23 +10x_31 + 12x_32 + 15x_33
+#Where x_ij is AED’s produced from plant i to warehouse j; i=1,2,3 and j=1,2,3
+
+#Production Constraints:
+#Plant A : x_11 + x_12 + x_(13 ) = 100
+#Plant B:  x_21 + x_22 + x_(23 ) = 125
+#Plant C:  x_31+ x_32 + x_(33 ) = 150
+
+#Demand Constraints: 
+#Warehouse1: x_11 + x_12 + x_(13 ) = 80
+#Warehouse2: x_21 + x_22 + x_(23 ) = 90
+#Warehouse3: x_31 + x_32 + x_(33 ) = 70 
+#Non-negativity decision variables: x_ij ≥ 0 where i=1,2,3 and j=1,2,3
+
+```
+
+
+```{r}
+#Now solving the above formulated transportation model in R.
+#The first chunk calls the library.
+library(lpSolve)
+```
+
+```{r}
+#The second chunk sets the objective function.
+costs <- matrix(c(20, 14, 25,
+                  12, 15, 14,
+                  10, 12, 15), nrow = 3)
+```
+
+```{R}
+#Set up constraint signs and right-hand sides (supply side)
+row.signs <- rep("<=", 3)
+row.rhs <- c(100, 125,150)
+
+#Demand (sinks) side constraints
+col.signs <- rep(">=", 3)
+col.rhs <- c(80,90,70)
+
+#Run the model
+lptrans <- lp.transport(costs, "min", row.signs, row.rhs, col.signs, col.rhs)
+
+
+#Getting the values of 12 decision variables
+lptrans$solution
+
+
+#Out of 9 decision variables, we got 4 of them non-zero. From the solution of the decision variables, we can deduce that PlantA allocates its monthly production capacity 100 into two different warehouses: Warehouses 2 and 3. Similarly, PlantB supplies its shipping costs into warehouse 1 and 3. Similarly, plantC shipping costs to warehouse 2 only. 
+```
+
+```{r}
+#QUESTION2
+#Here, let and be the dual variables associated to the two classes of constraints: supply and demand constraints.
+
+#Constants of the right hand side of the primal will be the coefficients of the objective function of the dual. RHS constants of the primal are 100, 125, 150, 80, 90, 70 . So, these numbers serve as the coefficients of the objective function of the dual. 
+
+#The dual objective function is the value addition (VA) for the production capacity. The positive part is what the monthly production gets by shipping goods to the demanders and the negative part is the cost of producing goods. The difference is the VA or profit. Thus the dual problem is to maximize VA. 
+
+#The objective function of the dual is the
+#MAX Z = 80v_1 + 90v_2 + 70v_3 - 100u_1 - 125u_2 - 150u_3
+```
+
+```{r}
+#constraints= v_j - u_i ≥ c_(ij )
+```
+
+```{r}
+#The PLANT A transports goods to three possible destinations. That is
+#v_1 - u_1 ≥ c_(11 ) = 20
+#v_2 - u_1 ≥ c_(12 ) = 14
+#v_3 - u_1 ≥ c_(13 ) = 25
+```
+
+```{r}
+#The PLANT B transports goods to three possible destinations. That is
+#v_1 - u_1 ≥ c_(11 ) = 12
+#vv_2 - u_1 ≥ c_(12 ) = 15
+#v_3 - u_1 ≥ c_(13 ) = 14
+```
+
+```{r}
+#The PLANT C transports goods to three possible destinations. That is
+#v_1 - u_1 ≥ c_(11 ) = 10
+#v_2 - u_1 ≥ c_(12 ) = 12
+#v_3 - u_1 ≥ c_(13 ) = 15
+
+#Where, 
+#v_j ≥ 0 for j = 1, 2, 3, and u_(i ) ≥ 0 for i = 1, 2, 3
+
+```
+
+```{r}
+#QUESTION3
+# The dual minimizes demands*dual costs subject to dual costs being >= costs
+# This is the dual linear programming formulation.
+
+# Economic interpretation:
+# The dual variables represent the marginal costs of supplying an additional unit of demand from each warehouse. The optimal dual variables tell you the minimum marginal cost needed to supply another unit to each warehouse while still meeting all demands. This helps determine which supply routes have unused capacity that could be utilized if demands changed.
+
+#PART1
+
+##MR = MC rule
+#v_j - u_i ≥ c_ij  This means, v_j ≥  u_(i ) +  c_ij  
+
+#To be more specific, 
+#v_3 ≥  u_1 + 420 
+#The left side is the per unit revenue received by selling one unit of the product. This is what we call MR (marginal revenue) in economics. The right side is the per unit cost of making and transporting good. This is called MC (marginal cost). Supplier1 keeps on increasing production and shipping to the destinations3 as long as v_3 ≥  u_1 + 420, that is as long as MR ≥ MC. 
+
+#On the opposite, supplier1 reduces production and shipping if v_3 ≤  u_1 + 25, that is, MR ≤ MC . 
+#These both are dynamic situations where either production increases or decreases. When, v_3 = u_1 + 420 that is, MR = MC 
+
+
+#2. hiring or not hiring shipping company for shipping goods
+#if the difference, between v,{ j} and u,{ i} is lesser than or equal to c,{ ij}. still, if another shipping company can meet the  demand of v,{ j}. u,{ i} being  lower than or equal to c,{ ij} the supplier chooses to hire them of handling the transportation themselves. The supplier opts for the shipping company only if they can  transport  particulars within the specified limits than those that fall outside of it. thus, when v,{ j}. u,{ i} is lesser than or equal, to c,{ ij} both the patron( supplier) and the shipper are one and the same.However, in the event that v,{ j}- u,{ i}< =  c,{ ij}, the patron(force) will simply manufacture the  particulars and contract with a different shipping business to deliver them.
+```
+
+
