@@ -1,0 +1,289 @@
+---
+title: "QMM ASSIGNMENT- DEA ANALYSIS"
+author: "DIVYA CHANDRASEKARAN_811284790"
+date: "2023-10-26"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r}
+#LOAD THE NECESSARY LIBARIES
+library(tidyverse)
+library(Benchmarking)
+
+```
+
+```{r}
+#CREATING THE VECTORS WITH THE VALUES GIVEN
+input <- matrix(c(100, 300, 320, 500, 350, 340, 300, 600, 1200, 2000, 1400, 700),ncol = 2)
+output <- matrix(c(15000, 15000, 40000, 28000, 20000, 14000, 3500, 20000, 11000, 42000, 25000, 15000),ncol = 2)
+
+#ASSIGN THE COLUMN NAMES
+colnames(output) <- c("staff_hours_perday","supplies_perday")
+colnames(input) <- c("reimbursed_patient_days", "privately_paid_patient-days")
+
+# To see the values of Input
+input
+```
+
+```{r}
+# To see the values of Output
+output
+```
+
+```{r}
+#DEA ANALYSIS USING FREE DISPOSAL HULL
+
+# Provide the input and output
+analysis_fdh<- dea(input, output, RTS = "fdh")
+
+# Create a data frame with efficiency values
+eff_fdh <- as.data.frame(analysis_fdh$eff)
+
+# Assigning an appropriate name
+colnames(eff_fdh) <- c("efficiency_fdh")
+
+# Determining the peers
+peer_fdh <- peers(analysis_fdh)
+
+# Assigning a name for peer
+colnames(peer_fdh) <- c("peer1_fdh")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_fdh <- lambda(analysis_fdh)
+
+# Assigning an appropriate column name for Lambda function
+names(lambda_fdh) <- c("Lambda1_fdh", "Lambda2_fdh", "Lambda3_fdh", "Lambda4_fdh", "Lambda5_fdh", "Lambda6_fdh")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_fdh <- cbind(peer_fdh, lambda_fdh, eff_fdh)
+
+# Presenting the summary chart
+peer_lamb_eff_fdh
+```
+
+```{r}
+# Plotting the results for DEA ANALYSIS USING FDH
+dea.plot(input, output, RTS = "fdh", ORIENTATION = "in-out", txt = TRUE, xlab = 'Inputs', ylab = 'Outputs', main = "Free disposability Hull Graph") 
+```
+
+```{r}
+#DEA ANALYSIS USING CONSTANT RETURN TO SCALE
+
+# Provide the input and output
+analysis_crs <- dea(input,output,RTS = "crs")
+
+# To see the efficiency values
+eff_crs <- as.data.frame(analysis_crs$eff)
+
+# Assigning an appropriate name
+colnames(eff_crs) <- c("efficiency_crs")
+
+# Determining the peers
+peer_crs <- peers(analysis_crs) 
+str(peer_crs)
+
+# Assigning an appropriate name for peer 
+names(peer_crs) <- c("peer1_crs", "peer2_crs", "peer3_crs")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_crs <- lambda(analysis_crs)
+
+# Assigning a column name for Lambda function
+names(lambda_crs) <- c("Lambda1_crs", "Lambda2_crs", "Lambda3_crs", "Lambda4_crs")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_crs <- cbind(peer_crs, lambda_crs, eff_crs)
+
+# Presenting the summary chart
+peer_lamb_eff_crs
+
+# Plotting the results for DEA ANALYSIS USING CRS
+dea.plot(input,output,RTS="crs",ORIENTATION="in-out",   
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Constant Returns to Scale Graph")
+```
+
+```{r}
+#DEA ANALYSIS USING VARIABLE RETURN TO SCALE
+
+# Provide the input and output
+analysis_vrs <- dea(input,output,RTS = "vrs")
+
+# To see the efficiency values
+eff_vrs <- as.data.frame(analysis_vrs$eff)
+
+# Assigning an appropriate name
+colnames(eff_vrs) <- c("efficiency_vrs")
+
+# Determining the peers
+peer_vrs <- peers(analysis_vrs)
+
+# Assigning an appropriate name for peer
+names(peer_vrs) <- c("peer1_vrs", "peer2_vrs", "peer3_vrs")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_vrs <- lambda(analysis_vrs)
+
+# To assign a column name for Lambda function
+names(lambda_vrs) <- c("Lamda1_vrs", "Lambda2_vrs", "Lambda3_vrs", "Lambda4_vrs", "Lambda5_vrs")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_vrs <- cbind(peer_vrs, lambda_vrs, eff_vrs)
+
+# Presenting the summary chart
+peer_lamb_eff_vrs
+```
+
+```{r}
+# Plotting the results for DEA ANALYSIS USING VRS
+dea.plot(input,output,RTS="vrs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Input', ylab= 'Output', main="Variable Returns to Scale Graph")
+```
+
+```{r}
+
+#DEA USIING INCREASING RETURN TO SCALE
+
+# Provide the input and output
+analysis_irs <- dea(input,output,RTS = "irs")
+
+# To see the efficiency values
+eff_irs <- as.data.frame(analysis_irs$eff)
+
+# Assigning a name
+colnames(eff_irs) <- c("efficiency_irs")
+
+# Determining the peers
+peer_irs <- peers(analysis_irs)
+
+# Assigning an appropriate name for peer 
+names(peer_irs) <- c("peer1_irs", "peer2_irs", "peer3_irs")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_irs <- lambda(analysis_irs)
+
+# Assigning a column name for Lambda function
+names(lambda_irs) <- c("Lambda1_irs", "Lambda2_irs", "Lambda3_irs", "Lambda4_irs", "Lambda5_irs")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_irs <- cbind(peer_irs, lambda_irs, eff_irs)
+
+# Presenting the summary chart
+peer_lamb_eff_irs
+
+# Plotting the results for DEA ANALYSIS USING IRS
+dea.plot(input,output,RTS="irs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Increasing Returns to Scale Graph")
+
+```
+
+```{r}
+#DEA ANALYSIS USING DECREASING RETURNS TO SCALE 
+
+# Provide the input and output
+analysis_drs <- dea(input,output,RTS = "drs")
+
+# To see the efficiency values
+eff_drs <- as.data.frame(analysis_drs$eff)
+
+# Assigning an appropriate name
+colnames(eff_drs) <- c("efficiency_drs")
+
+# Determining the peers
+peer_drs <- peers(analysis_drs)
+
+#Assigning an appropriate name for peer
+names(peer_drs) <- c("peer1_drs", "peer2_drs", "peer3_drs")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_drs <- lambda(analysis_drs)
+
+#Assigning a column name for Lambda
+names(lambda_drs) <- c("Lambda1_drs", "Lambda2_drs", "Lambda3_drs", "Lambda4_drs")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_drs <- cbind(peer_drs, lambda_drs, eff_drs)
+
+# Presenting the summary chart
+peer_lamb_eff_drs
+
+```
+
+```{r}
+# Plotting the results for DEA ANALYSIS USING DRS
+dea.plot(input,output,RTS="drs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Decreasing Returns to Scale Graph")
+
+```
+
+```{r}
+#DEA ANALYSIS USNG FREE REPLICABLILTY HULL
+
+# Provide the input and output
+analysis_frh <- dea(input,output,RTS = "add")
+
+# To see the efficiency values
+eff_frh <- as.data.frame(analysis_frh$eff)
+
+# To assign an appropriate name
+colnames(eff_frh) <- c("efficiency_frh")
+
+# Determining the peers
+peer_frh <- peers(analysis_frh)
+
+# Assigning a name for the peer
+names(peer_frh) <- c("peer1_frh")
+
+# Identifying the relative weights given to the peers using lambda function
+lambda_frh <- lambda(analysis_frh)
+
+# Assigning a column name for Lambda function
+names(lambda_frh) <- c ("Lambda1_frh", "Lambda2_frh", "Lambda3_frh", "Lambda4_frh", "Lambda5_frh", "Lambda6_frh")
+
+# Creating a tabular data with peer, lambda, and efficiency
+peer_lamb_eff_frh <- cbind(peer_frh, lambda_frh, eff_frh)
+
+# Presenting the summary chart
+peer_lamb_eff_frh
+
+# Plotting the results for DEA ANALYSIS USING FRH
+dea.plot(input,output,RTS="add",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main = "Free Replicability Hull Graph")
+```
+
+```{r}
+#COMPARISON BETWEEN DIFFERENT ASSUMPTIONS FROM OBTAINED RESULTS ABOVE
+
+dea.plot(input,output,RTS="fdh",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Free disposability hull Graph")
+
+dea.plot(input,output,RTS="vrs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Variable Returns to Scale Graph")
+
+dea.plot(input,output,RTS="drs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Decreasing Returns to Scale Graph")
+
+dea.plot(input,output,RTS="irs",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Increasing Returns to Scale Graph")
+
+dea.plot(input,output,RTS="crs",ORIENTATION="in-out",
+txt=TRUE, main="Constant Returns to Scale Graph")
+
+dea.plot(input,output,RTS="add",ORIENTATION="in-out",
+txt=TRUE, xlab = 'Inputs', ylab= 'Outputs', main= "Free Replicability Hull Graph")
+
+```
+
+```{r}
+# COMPILE THE RESULTS FOR EFFICIENCY FOR ALL THE MODELS
+results <- data.frame(FDH = eff_fdh, CRS = eff_crs, VRS = eff_vrs, IRS = eff_irs, DRS = eff_drs, FRH = eff_frh)
+
+# NOW, LET'S DISPLAY THE RESULTS
+results
+```
+
+
+
+
+
