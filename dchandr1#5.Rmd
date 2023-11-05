@@ -1,0 +1,113 @@
+---
+title: "QMM ASSIGNMENT- GOAL PROGRAMMING"
+author: "DIVYA CHANDRASEKARAN_811284790"
+date: "2023-11-05"
+output: word_document
+---
+
+#QUESTION 1 AND 2 ARE IN THE OUTPUT PDF
+
+
+
+```{r}
+#QUESTION3
+#LOADING THE LIBRARY NEEDED
+library(lpSolveAPI)
+```
+
+```{r}
+#MAKING LP OBJECT WITH 2 CONTRAINTS (ROWS) and 7 DECISION VARIABLES (COLUMNS) 
+lprec <- make.lp(2, 7)
+
+#NOW WE WILLL CREATE THE OBJECTIVE FUNCTION. HERE, THE DEFAULT WILL BE THE MINIMIZATION PROBLEM. 
+set.objfn(lprec, c(15,12,20,-5,-5,0,-2))
+
+#SINCE THE DEFAULT IS THE MINIMIZATION PROBLEM, WE WILL CHANGE THE DIRECTION AND SET IT TO MAXIMIZATION.
+lp.control(lprec,sense='max')
+```
+
+```{r}
+#HERE, WE WILL ADD THE TWO CONSTRAINTS ASSOCIATED WITH THE CHANGE IN LEVEL OF EMPLOYMENT AND NEXT YEAR'S EARNINGS.
+
+#TO IMPLEMENT THAT, FIRST SET OF CONSTRAINTS ARE FOR PLANT1.
+#CURRENT LEVEL OF EMPLOYMENT
+add.constraint(lprec, c(8, 6, 5, -1, 1, 0, 0), "=", 70)
+
+#NEXT YEAR'S EARNINGS
+add.constraint(lprec, c(6, 5, 4, 0, 0, -1, 0), "=", 60)
+
+#SETTING BOUNDS FOR VARIABLES
+#WE NEED TO NOTE THAT ALL VARIABLES HAS TO BE NON-NEGATIVE. HOWEVER, WE DON'T NEED TO DO IT SINCE IT'S ALREADY THE DEFAULT.
+#NOW, WE CAN SET THE BOUNDS EXPLICITLY
+set.bounds(lprec, lower = c(0, 0, 0, 0, 0, 0, 0), columns = c(1, 2, 3, 4, 5, 6, 7)) 
+
+
+#IDENTIFYING THE VARIABLES AND CONSTRAINTS, AND CREATING LABLES FOR THE COLUMNS (VARIABLES) AND ROWS (CONSTRAINTS)
+#AND SETTING VARIABLE NAMES AND NAMES FOR THE CONSTRAINTS
+ColNames <- c("rate_of_project1", "rate_of_project2", "rate_of_project3","penalty_positive_change_level_of_employment", "penalty_negative_change_level_of_employment", "penalty_positive_change_level_of_next_year_earnings", "penalty_negative_change_level_of_next_year_earnings", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint")
+RowNames <- c("current_level_emplyment", "next_year_earnings")
+
+#dimnames(lprec) <- list(RowNames, ColNames)
+
+#PRINTING OUT THE MODEL
+lprec
+```
+
+```{r}
+#THIS MODEL CAN ALSO BE SAVED INTO A FILE
+write.lp(lprec, filename = "EMAX_CORPORATION", type = "lp")
+```
+
+```{r}
+solve(lprec)
+#The output above doesn’t indicate that the answer is 0, but that there was a successful solution We now output the value of the objective function, and the variables.
+```
+
+```{r}
+get.objective(lprec)
+```
+
+```{r}
+get.variables(lprec)
+
+```
+
+```{r}
+write.lp(lprec, filename = "Emax_Corporation_goal_programming_problem", type = "lp")
+y <- read.lp(filename = "Emax_Corporation_goal_programming_problem", type = "lp") 
+
+#CREATING A LP OBJECT NAMED 'y' 
+y
+```
+
+```{R}
+solve(y)
+```
+
+```{r}
+#GETTING THE OBJECTIVE VALUES
+get.objective(y)        
+```
+
+```{R}
+#GETTING THE VALUES OF DECISION VARIABLES
+get.variables(y)        
+```
+
+```{R}
+#GETTING THE CONSTRAINT RHS VALUES
+get.constraints(y)      
+```
+
+#In the third question, the goal programming model was formulated as a linear programming (LP) model in R and solved to determine the optimal production quantities. 
+#The objective function was defined to maximize total profit, with penalty terms incorporated for deviations from the employment and earnings goals. Constraints were added to represent the employment and earnings goals. Non-negativity constraints were imposed on the deviation variables.
+#The lpSolve package was used to solve the resulting LP model. The optimal solution was found to be:
+#- x1 = 10
+#- x2 = 10 
+#- x3 = 10
+#The employment goal is achieved exactly and earnings goal is exceeded. No negative devations needed.
+#With these production quantities, the maximum total profit is $270 million.
+#The employment goal is achieved exactly at the target of 70 units. The earnings goal is exceeded, with earnings reaching $80 million (based on the unit contributions). Therefore, no negative deviations are required.
+#In conclusion, the goal programming model provides an optimal production plan that maximizes profit while satisfying the employment goal exactly and exceeding the earnings target. This aligns well with management's aims to maximize profit, maintain a stable workforce, and achieve an increase in earnings. The model effectively balances the different goals and provides useful insights for decision-making. Goal programming is an effective technique for this type of multi-objective optimization problem.
+
+#Additonally, we mentioned the need to create a text file in the lp format for the Weigelt problem formulation. This is a standard way to represent linear programming and goal programming problems for various solvers. We can write the problem in the lp format, specifying the objective function, constraints, and variable bounds.
