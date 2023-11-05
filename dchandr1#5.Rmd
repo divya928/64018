@@ -1,0 +1,115 @@
+---
+title: "QMM ASSIGNMENT- GOAL PROGRAMMING"
+author: "DIVYA CHANDRASEKARAN_811284790"
+date: "2023-11-05"
+output: word_document
+---
+
+#QUESTION 1 AND 2 ARE IN THE OUTPUT PDF
+
+
+
+```{r}
+#QUESTION3
+#LOADING THE LIBRARY NEEDED
+library(lpSolveAPI)
+```
+
+```{r}
+#MAKING LP OBJECT WITH 2 CONTRAINTS (ROWS) and 7 DECISION VARIABLES (COLUMNS) 
+lprec <- make.lp(2, 7)
+
+#NOW WE WILLL CREATE THE OBJECTIVE FUNCTION. HERE, THE DEFAULT WILL BE THE MINIMIZATION PROBLEM. 
+set.objfn(lprec, c(20,15,25,-6,-6,0,-3))
+
+#SINCE THE DEFAULT IS THE MINIMIZATION PROBLEM, WE WILL CHANGE THE DIRECTION AND SET IT TO MAXIMIZATION.
+lp.control(lprec,sense='max')
+```
+
+```{r}
+#HERE, WE WILL ADD THE TWO CONSTRAINTS ASSOCIATED WITH THE CHANGE IN LEVEL OF EMPLOYMENT AND NEXT YEAR'S EARNINGS.
+
+#TO IMPLEMENT THAT, FIRST SET OF CONSTRAINTS ARE FOR PLANT1.
+#CURRENT LEVEL OF EMPLOYMENT
+add.constraint(lprec, c(6, 4, 5, -1, 1, 0, 0), "=", 50)
+
+#NEXT YEAR'S EARNINGS
+add.constraint(lprec, c(8, 7, 5, 0, 0, -1, 0), "=", 75)
+
+#SETTING BOUNDS FOR VARIABLES
+#WE NEED TO NOTE THAT ALL VARIABLES HAS TO BE NON-NEGATIVE. HOWEVER, WE DON'T NEED TO DO IT SINCE IT'S ALREADY THE DEFAULT.
+#NOW, WE CAN SET THE BOUNDS EXPLICITLY
+set.bounds(lprec, lower = c(0, 0, 0, 0, 0, 0, 0), columns = c(1, 2, 3, 4, 5, 6, 7)) 
+
+
+#IDENTIFYING THE VARIABLES AND CONSTRAINTS, AND CREATING LABLES FOR THE COLUMNS (VARIABLES) AND ROWS (CONSTRAINTS)
+#AND SETTING VARIABLE NAMES AND NAMES FOR THE CONSTRAINTS
+ColNames <- c("rate_of_project1", "rate_of_project2", "rate_of_project3","penalty_positive_change_level_of_employment", "penalty_negative_change_level_of_employment", "penalty_positive_change_level_of_next_year_earnings", "penalty_negative_change_level_of_next_year_earnings", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint", "non-negativity_constraint")
+RowNames <- c("current_level_emplyment", "next_year_earnings")
+
+#dimnames(lprec) <- list(RowNames, ColNames)
+
+#PRINTING OUT THE MODEL
+lprec
+```
+
+```{r}
+#THIS MODEL CAN ALSO BE SAVED INTO A FILE
+write.lp(lprec, filename = "EMAX_CORPORATION", type = "lp")
+```
+
+```{r}
+solve(lprec)
+#The output above doesn’t indicate that the answer is 0, but that there was a successful solution We now output the value of the objective function, and the variables.
+```
+
+```{r}
+get.objective(lprec)
+```
+
+```{r}
+get.variables(lprec)
+
+```
+
+```{r}
+write.lp(lprec, filename = "Emax_Corporation_goal_programming_problem", type = "lp")
+y <- read.lp(filename = "Emax_Corporation_goal_programming_problem", type = "lp") 
+
+#CREATING A LP OBJECT NAMED 'y' 
+y
+```
+
+```{R}
+solve(y)
+```
+
+```{r}
+#GETTING THE OBJECTIVE VALUES
+get.objective(y)        
+```
+
+```{R}
+#GETTING THE VALUES OF DECISION VARIABLES
+get.variables(y)        
+```
+
+```{R}
+#GETTING THE CONSTRAINT RHS VALUES
+get.constraints(y)      
+```
+
+#It seems like you're discussing the results of a nonpreemptive goal programming problem and the solution to that problem. Nonpreemptive goal programming is a mathematical optimization technique used to achieve a set of goals or objectives while minimizing the deviation from those goals.
+
+#The mentioned the following variables and their values:
+
+#1. x1: The rate of project 1 with a value of 0.
+#2. x2: The rate of project 2 with a value of 0.
+#3. x3: The rate of project 2 with a value of 15.
+#4. y1+: A positive deviation variable for the first goal with a value of 25.
+#5. y1-: A negative deviation variable for the first goal with a value of 0.
+#6. y2+: A positive deviation variable for the second goal with a value of 0.
+#7. y2-: A negative deviation variable for the second goal with a value of 0.
+
+#It appears that we have formulated and solved a goal programming problem with two goals: increasing employment and maximizing long-term profit. The solution indicates that you have exceeded the employment goal by 25 (2,500 employees) and achieved a profit of $375 million.
+#Additonally, we mentioned the need to create a text file in the lp format for the Weigelt problem formulation. This is a standard way to represent linear programming and goal programming problems for various solvers. We can write the problem in the lp format, specifying the objective function, constraints, and variable bounds.
