@@ -1,0 +1,52 @@
+---
+title: "Assignment6"
+author: "DIVYA CHANDRASEKARAN_811284790"
+date: "2023-11-18"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r}
+#LOADING THE REQUIRED LIBRARIES
+
+library(lpSolveAPI)
+```
+
+```{r}
+#READING THE LP FILE
+integer <- read.lp("integer.lp")
+
+#SEE THE FILE
+integer
+
+```
+
+```{r}
+#CHECKING IF THE MODEL COVERAGES
+solve(integer)
+```
+
+```{r}
+#SEEING THE OBJECTIVE FUNCTION
+
+get.objective(integer)
+```
+
+```{r}
+#SEEING THE OPTIMAL NUMBER OF VARIABLES
+get.variables(integer)
+```
+
+```{r}
+
+workers_days = matrix(c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",20,25,22,28,25,22,20),ncol = 2, byrow = F)
+colnames(workers_days) = c("DayOfTheWeek","Workers")
+as.table(workers_days)
+```
+
+```{r}
+#SEEING THE CONSTRAINTS
+get.constraints(integer)
+```
+
